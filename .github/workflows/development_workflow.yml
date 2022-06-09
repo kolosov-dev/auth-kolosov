@@ -1,0 +1,37 @@
+name: 01. CI\CD Development workflow
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  test:
+    name: Testing auth app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+
+      - name: Path
+        run: pwd
+
+  deploy:
+    name: Deploy to development server
+    environment: development
+    runs-on: self-hosted
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+
+      - name: Make env var REDIS_HOST
+        run: echo REDIS_HOST=${{ secrets.GITENV_REDIS_HOST }}  > .env
+      
+      - name: Make env var REDIS_PASSWORD
+        run: echo REDIS_PASSWORD=${{ secrets.GITENV_REDIS_PASSWORD }} >> .env
+
+      - name: Down auth container
+        run: docker compose down
+
+      - name: Up auth container
+        run: docker compose up -d
+
